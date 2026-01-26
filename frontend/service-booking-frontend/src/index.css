@@ -1,0 +1,47 @@
+body {
+margin: 0;
+background-color: #f8f9fa;
+font-family: "Segoe UI", Arial, sans-serif;
+}
+
+
+.navbar {
+background-color: #212529 !important;
+}
+
+
+.card {
+border-radius: 10px;
+}
+
+
+h1, h2, h3, h4, h5 {
+color: #212529;
+}
+
+
+.btn-primary {
+background-color: #0d6efd;
+border: none;
+}
+
+
+.btn-success {
+background-color: #198754;
+border: none;
+}
+
+
+.badge-success {
+background-color: #198754;
+}
+
+
+.badge-warning {
+background-color: #ffc107;
+}
+
+
+a {
+text-decoration: none;
+}
