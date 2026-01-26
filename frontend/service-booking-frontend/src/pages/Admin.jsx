@@ -2,15 +2,22 @@ import { useEffect, useState } from "react";
 import API from "../api";
 import { toast } from "react-toastify";
 import PageWrapper from "../components/PageWrapper";
-import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
 export default function Admin() {
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const loadBookings = () => {
-    API.get("/api/admin/bookings")
-      .then((res) => setBookings(res.data))
-      .catch(() => toast.error("Failed to load bookings"));
+  const loadBookings = async () => {
+    try {
+      const res = await API.get("/admin/bookings");
+      setBookings(res.data);
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to load bookings"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -19,76 +26,101 @@ export default function Admin() {
 
   const markCompleted = async (id) => {
     try {
-      await API.put(`/api/admin/bookings/${id}`);
-      toast.success("Marked as Completed");
+      await API.put(`/admin/bookings/${id}`);
+      toast.success("Status updated to Completed");
       loadBookings();
-    } catch {
-      toast.error("Update failed");
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to update booking"
+      );
     }
   };
 
-  const data = [
-    {
-      name: "Completed",
-      value: bookings.filter((b) => b.status === "Completed").length,
-    },
-    {
-      name: "Pending",
-      value: bookings.filter((b) => b.status === "Pending").length,
-    },
-  ];
-
-  const COLORS = ["#198754", "#ffc107"];
+  if (loading) {
+    return (
+      <PageWrapper>
+        <div className="container mt-5 text-center">
+          <div className="spinner-border text-primary"></div>
+          <p className="mt-2">Loading bookings...</p>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   return (
     <PageWrapper>
       <div className="container mt-4">
         <h2 className="text-center mb-4">Admin Dashboard</h2>
 
-        <div className="row mb-4 justify-content-center">
-          <PieChart width={300} height={300}>
-            <Pie data={data} dataKey="value" nameKey="name" outerRadius={100}>
-              {data.map((_, i) => (
-                <Cell key={i} fill={COLORS[i]} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </div>
+        <div className="table-responsive">
+          <table className="table table-bordered table-hover align-middle">
+            <thead className="table-dark">
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Service</th>
+                <th>Price</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
 
-        <div className="row">
-          {bookings.map((b) => (
-            <div key={b._id} className="col-12 col-md-6 col-lg-4 mb-3">
-              <div className="card shadow h-100">
-                <div className="card-body">
-                  <h5>{b.service.name}</h5>
-                  <p>₹{b.service.price}</p>
-                  <p>{new Date(b.dateTime).toLocaleString()}</p>
+            <tbody>
+              {bookings.length === 0 && (
+                <tr>
+                  <td colSpan="8" className="text-center">
+                    No bookings found
+                  </td>
+                </tr>
+              )}
 
-                  <span
-                    className={
-                      "badge " +
-                      (b.status === "Completed"
-                        ? "bg-success"
-                        : "bg-warning")
-                    }
-                  >
-                    {b.status}
-                  </span>
+              {bookings.map((b) => (
+                <tr key={b._id}>
+                  <td>{b.user?.name || "N/A"}</td>
+                  <td>{b.user?.email || "N/A"}</td>
+                  <td>{b.service?.name}</td>
+                  <td>₹{b.service?.price}</td>
+                  <td>
+                    {new Date(b.dateTime).toLocaleDateString()}
+                  </td>
+                  <td>
+                    {new Date(b.dateTime).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                    }).toUpperCase()}
+                  </td>
+                  <td>
+                    <span
+                      className={
+                        "badge " +
+                        (b.status === "Completed"
+                                ? "bg-success": 
+                        b.status === "Cancelled"
+                                ? "bg-danger"
+                                :"bg-warning")
 
-                  {b.status === "Pending" && (
-                    <button
-                      className="btn btn-success w-100 mt-2"
-                      onClick={() => markCompleted(b._id)}
+                      }
                     >
-                      Mark Completed
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+                      {b.status}
+                    </span>
+                  </td>
+                  <td>
+                    {b.status === "Pending" && (
+                      <button
+                        className="btn btn-sm btn-success"
+                        onClick={() => markCompleted(b._id)}
+                      >
+                        Mark Completed
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </PageWrapper>

@@ -5,19 +5,41 @@ import PageWrapper from "../components/PageWrapper";
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadBookings = async () => {
+    try {
+      const res = await API.get("/bookings");
+      setBookings(res.data);
+    } catch {
+      toast.error("Failed to load bookings");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    API.get("/bookings")
-      .then((res) => setBookings(res.data))
-      .catch(() => toast.error("Failed to load bookings"));
+    loadBookings();
   }, []);
 
-  if (bookings.length === 0) {
+  const cancelBooking = async (id) => {
+    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+
+    try {
+      await API.put(`/bookings/cancel/${id}`);
+      toast.success("Booking cancelled");
+      loadBookings();
+    } catch {
+      toast.error("Cancel failed");
+    }
+  };
+
+  if (loading) {
     return (
       <PageWrapper>
         <div className="container mt-5 text-center">
-          <h4>No bookings yet</h4>
-          <p className="text-muted">Book a service to see it here</p>
+          <div className="spinner-border text-primary"></div>
+          <p className="mt-2">Loading bookings...</p>
         </div>
       </PageWrapper>
     );
@@ -29,6 +51,10 @@ export default function MyBookings() {
         <h2 className="text-center mb-4">My Bookings</h2>
 
         <div className="row">
+          {bookings.length === 0 && (
+            <p className="text-center text-muted">No bookings found</p>
+          )}
+
           {bookings.map((b) => (
             <div key={b._id} className="col-12 col-md-6 col-lg-4 mb-3">
               <div className="card shadow h-100">
@@ -41,21 +67,40 @@ export default function MyBookings() {
                     {new Date(b.dateTime).toLocaleDateString()}
                   </p>
 
-                  <p>
+                <p>
                     <strong>Time:</strong>{" "}
-                    {new Date(b.dateTime).toLocaleTimeString()}
-                  </p>
+                    {new Date(b.dateTime).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                    }).toUpperCase()}
+                </p>
 
-                  <span
-                    className={
-                      "badge " +
-                      (b.status === "Completed"
-                        ? "bg-success"
-                        : "bg-warning")
-                    }
-                  >
-                    {b.status}
-                  </span>
+
+                  <div className="d-flex justify-content-between align-items-center mt-3">
+                    <span
+                        className={
+                        "badge " +
+                        (b.status === "Completed"
+                            ? "bg-success"
+                            : b.status === "Cancelled"
+                            ? "bg-danger"
+                            : "bg-warning")
+                        }
+                    >
+                        {b.status}
+                    </span>
+
+                    {b.status === "Pending" && (
+                        <button
+                        className="btn btn-sm btn-danger text-white px-3"
+                        onClick={() => cancelBooking(b._id)}
+                        >
+                        Cancel
+                        </button>
+                    )}
+                    </div>
+
                 </div>
               </div>
             </div>

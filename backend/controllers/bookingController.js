@@ -39,3 +39,26 @@ res.json(bookings);
 res.status(500).json({ message: "Server error" });
 }
 };
+
+exports.cancelBooking = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // Prevent cancelling others' bookings
+    if (booking.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    booking.status = "Cancelled";
+    await booking.save();
+
+    res.json({ message: "Booking cancelled successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

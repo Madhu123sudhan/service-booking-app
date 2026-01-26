@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import AdminLogin from "./pages/AdminLogin";
 import Register from "./pages/Register";
 import Services from "./pages/Services";
 import MyBookings from "./pages/MyBookings";
@@ -16,6 +17,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/adminlogin" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
 
         <Route
@@ -46,13 +48,13 @@ export default function App() {
         />
 
         <Route
-  path="/admin"
-  element={
-    <ProtectedRoute adminOnly={true}>
-      <Admin />
-    </ProtectedRoute>
-  }
-/>
+          path="/admin"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
 
       </Routes>
     </BrowserRouter>

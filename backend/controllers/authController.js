@@ -52,16 +52,16 @@ const loginUser = async (req, res) => {
     const token = jwt.sign(
       {
         id: user._id,
-        role: user.role || "user", // 🔥 Force role into token
+        role:"user", // 🔥 Force role into token
       },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
     // 🔥 THIS IS WHAT FRONTEND NEEDS
-    res.json({
+ res.json({
       token,
-      role: user.role || "user",
+      role: "user",
       message: "Login successful",
     });
   } catch (err) {

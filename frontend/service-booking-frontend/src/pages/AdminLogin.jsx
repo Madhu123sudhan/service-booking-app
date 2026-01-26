@@ -1,29 +1,31 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import API from "../api";
+import  AuthContext from "../context/AuthContext";
 
-export default function Register() {
+export default function Login() {
   const [form, setForm] = useState({
-    name: "",
     email: "",
     password: "",
   });
 
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await API.post("/auth/register", form);
-      alert("Registered successfully. You can now login.");
-      navigate("/login");
-    } catch (err) {
-      alert(
-        err.response?.data?.message ||
-          "Registration failed. Email may already exist."
-      );
-    }
-  };
+  const adminhandlesubmit = async (e) => {
+      e.preventDefault();
+      try {
+        const res = await API.post("/admin/adminlogin", form);
+        login(res.data.token, res.data.role);
+        navigate("/admin");
+      } catch (err) {
+        alert(
+          err.response?.data?.message ||
+            "Login failed. your are not admin."
+        );
+        
+      }
+    };
 
   return (
     <div className="container">
@@ -31,21 +33,9 @@ export default function Register() {
         <div className="col-12 col-sm-8 col-md-6 col-lg-4">
           <div className="card shadow mt-5">
             <div className="card-body">
-              <h3 className="text-center mb-3">Register</h3>
+              <h3 className="text-center mb-3">Admin Login</h3>
 
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label className="form-label">Name</label>
-                  <input
-                    className="form-control"
-                    required
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
-                  />
-                </div>
-
+              <form onSubmit={adminhandlesubmit}>
                 <div className="mb-3">
                   <label className="form-label">Email</label>
                   <input
@@ -72,14 +62,11 @@ export default function Register() {
                   />
                 </div>
 
-                <button type="submit" className="btn btn-success w-100">
-                  Register
+                <button type="submit" className="btn btn-primary w-100">
+                  Login
                 </button>
               </form>
 
-              <p className="text-center mt-3">
-                Already have an account? <Link to="/">Login</Link>
-              </p>
             </div>
           </div>
         </div>
