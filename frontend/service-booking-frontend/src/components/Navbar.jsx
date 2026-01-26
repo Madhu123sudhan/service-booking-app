@@ -16,7 +16,7 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-dark bg-dark px-3 d-flex justify-content-between">
       {/* BRAND */}
-      <NavLink className="navbar-brand" to={role === "admin" ? "/admin" : "/services"}>
+      <NavLink className="navbar-brand" to={role === "admin" ? "/admin" : "/home"}>
         Service Booking
       </NavLink>
 
@@ -92,7 +92,7 @@ export default function Navbar() {
                   className="dropdown-item text-danger"
                   onClick={handleLogout}
                 >
-                  Logout
+                  Logout 
                 </button>
               )}
             </div>

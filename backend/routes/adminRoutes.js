@@ -31,6 +31,7 @@ router.post("/adminlogin", (req, res) => {
     res.json({
         token,
         role: "admin",
+        admin_name: "admin",
         message: "Admin login successful",
     });
 });
